@@ -16,7 +16,6 @@
     $service = new Google_Service_Calendar($gClient);
     $userData =	$oAuth->userinfo_v2_me->get();
 
-// Print the next 10 events on the user's calendar.
 $calendarId = 'primary';
 
 //get this week events
@@ -27,37 +26,78 @@ $optParams = array(
   'timeMax' => getMaxDate()
 );
 
+//variable declarations
 $sleepHours = 8;
-$stressLevelsBusy= array(8,16,8,8,8,8,8);
-$stressLevelsFree= array(8,0,8,8,8,8,8);
+$stressLevelsBusy= array();
+$stressLevelsFree= array();
 
 $results = $service->events->listEvents($calendarId, $optParams);
 $events = $results->getItems();
-function calculateRushLevel(){
+
     if (!empty($events)) {
-        foreach ($events as $event) {
-            $start = $event->start->dateTime;
-            $end = $event->end->dateTime;
-            //$day = getDayOfWeek($start);
-            echo $day;
-            if (empty($start))
-                $start = $event->start->date;
-            if (empty($start))
-                $end = $event->end->date;
-            $start = strtotime($start);
-            $end = strtotime($end);
+        $dayCount = 0; //represent sunday
+        $cur = getMinDate();//initialise cursor to check if previous event is on same day
+        for($dayCount = 0; $dayCount < 7; $dayCount++){
+            $durationBusy = 0;
+            foreach ($events as $event) {
+                $start = $event->start->dateTime;
+                $end = $event->end->dateTime;
+                $sameDay = getDayOfWeekNumber($start) == $dayCount? True: False;
+
+                if (empty($start))
+                    $start = $event->start->date;
+                if (empty($end))
+                    $end = $event->end->date;
+                
+                $start = strtotime($start);
+                $end = strtotime($end);
+                
+                if($sameDay){
+                    $durationBusy += ($end - $start) / 3600; //in minutes
+                }
+            };
             
-            $duration = ($end - $start) / 60;//in minutes
-            // printf("%s,  %s </br>", date("Y-M-d",strtotime($start)),  date("Y-M-d",strtotime($end)));
-            printf("Duration: %s </br>", $duration);
-            // printf("%s (%s) </br>", $event->getSummary(), $start);
+            //$durationBusy = $durationBusy/3600; //in minutes
+            $durationFree = 24 - $durationBusy - $sleepHours;
+            
+            array_push($stressLevelsBusy, $durationBusy);
+            array_push($stressLevelsFree, $durationFree);
         }
     }
+
+
+function getDayOfWeekFromDate($date){
+    return date("l",strtotime($date));
 }
 
-//return the day of the week to check if event is on same day
-function getDayOfWeek($date){
-    return date("l",strtotime($date));
+//so that will save 0 for days without events
+function getDayOfWeekNumber($date){
+    $date = getDayOfWeekFromDate($date);
+    //switch statement for sun = 0, mon = 1, etc
+    switch ($date) {
+        case 'Sunday':
+            return "0";
+        
+        case 'Monday':
+            return "1";
+        
+        case 'Tuesday':
+            return "2";
+        
+        case 'Wednesday':
+            return "3";
+    
+        case 'Thursday':
+            return "4";
+        
+        case 'Friday':
+            return "5";
+        
+        case 'Saturday':
+            return "6";
+        
+        
+    }
 }
 
 //get first day of the week
@@ -83,7 +123,7 @@ function getMaxDate(){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <meta http-equiv="X-UA-Compatible" content="ie=edge"> -->
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Dashboard Page</title>
     <link rel='stylesheet' href='fullcalendar/fullcalendar.css' />
 
@@ -129,13 +169,10 @@ function getMaxDate(){
 </head>
 
 <body>
-    <?php //echo date_format("l", strtotime("","previous sunday"))?>
+    <?php echo ""; ?>
     <ul class="nav justify-content-end">
         <!-- <li class="nav-item">
-            <a id="addButton" class="nav-link" href="AddEvent.php">Add Event</a>
-        </li> -->
-        <!-- <li class="nav-item">
-            <a id="chartButton" class="nav-link" href="ChartPage.php">Rush Level</a>
+            <a id="chartButton" class="nav-link" href="HelpPage.php">How to Use</a>
         </li> -->
         <li class="nav-item">
             <a id="logoutButton" class="nav-link btn btn-danger" href="LogoutPage.php">Sign Out</a>
@@ -182,13 +219,11 @@ function getMaxDate(){
                             label: 'Busy',
                             backgroundColor: '#ff49e260',
                             borderColor: '#f146d580',
-                            //pointBackgroundColor: '#46d5f1',
                             data: dsBusy
                         }, {
                             label: 'Free',
                             backgroundColor: '#49e2ff60',
                             borderColor: '#46d5f180',
-                            //pointBackgroundColor: '#46d5f1',
                             data: dsFree
                         }]
                     };
