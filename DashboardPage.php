@@ -1,29 +1,29 @@
 <?php 
-    require_once "config.php";
+require_once "config.php";
 
-    if(isset($_SESSION['access_token']))
-        $gClient->setAccessToken($_SESSION['access_token']);
-    else if(isset($_GET['code'])){
-        $token = $gClient->fetchAccessTokenWithAuthCode($_GET['code']);
-        $_SESSION['access_token']=$token;
-    }
-    else{
-        header('Location:LoginPage.php');
-    }
+if(isset($_SESSION['access_token']))
+    $gClient->setAccessToken($_SESSION['access_token']);
+else if(isset($_GET['code'])){
+    $token = $gClient->fetchAccessTokenWithAuthCode($_GET['code']);
+    $_SESSION['access_token']=$token;
+}
+else{
+    header('Location:LoginPage.php');
+}
 
-    // Get the API client and construct the service object.
-	$oAuth = new Google_Service_Oauth2($gClient);
-    $service = new Google_Service_Calendar($gClient);
-    $userData =	$oAuth->userinfo_v2_me->get();
+// Get the API client and construct the service object.
+$oAuth = new Google_Service_Oauth2($gClient);
+$service = new Google_Service_Calendar($gClient);
+$userData =	$oAuth->userinfo_v2_me->get();
 
 $calendarId = 'primary';
 
 //get this week events
 $optParams = array(
-  'orderBy' => 'startTime',
-  'singleEvents' => true,
-  'timeMin' => getMinDate(),
-  'timeMax' => getMaxDate()
+    'orderBy' => 'startTime',
+    'singleEvents' => true,
+    'timeMin' => getMinDate(),
+    'timeMax' => getMaxDate()
 );
 
 //variable declarations
@@ -34,37 +34,36 @@ $stressLevelsFree= array();
 $results = $service->events->listEvents($calendarId, $optParams);
 $events = $results->getItems();
 
-    if (!empty($events)) {
-        $dayCount = 0; //represent sunday
-        $cur = getMinDate();//initialise cursor to check if previous event is on same day
-        for($dayCount = 0; $dayCount < 7; $dayCount++){
-            $durationBusy = 0;
-            foreach ($events as $event) {
-                $start = $event->start->dateTime;
-                $end = $event->end->dateTime;
-                $sameDay = getDayOfWeekNumber($start) == $dayCount? True: False;
+//generate datasets for charts
+if (!empty($events)) {
+    $dayCount = 0; //represent sunday
+    $cur = getMinDate();//initialise cursor to check if previous event is on same day
+    for($dayCount = 0; $dayCount < 7; $dayCount++){
+        $durationBusy = 0;
+        foreach ($events as $event) {
+            $start = $event->start->dateTime;
+            $end = $event->end->dateTime;
+            $sameDay = getDayOfWeekNumber($start) == $dayCount? True: False;
 
-                if (empty($start))
-                    $start = $event->start->date;
-                if (empty($end))
-                    $end = $event->end->date;
-                
-                $start = strtotime($start);
-                $end = strtotime($end);
-                
-                if($sameDay){
-                    $durationBusy += ($end - $start) / 3600; //in minutes
-                }
-            };
+            if (empty($start))
+                $start = $event->start->date;
+            if (empty($end))
+                $end = $event->end->date;
             
-            //$durationBusy = $durationBusy/3600; //in minutes
-            $durationFree = 24 - $durationBusy - $sleepHours;
+            $start = strtotime($start);
+            $end = strtotime($end);
             
-            array_push($stressLevelsBusy, $durationBusy);
-            array_push($stressLevelsFree, $durationFree);
-        }
+            if($sameDay){
+                $durationBusy += ($end - $start) / 3600; //in hours
+            }
+        };
+        
+        $durationFree = 24 - $durationBusy - $sleepHours;
+        
+        array_push($stressLevelsBusy, $durationBusy);
+        array_push($stressLevelsFree, $durationFree);
     }
-
+}
 
 function getDayOfWeekFromDate($date){
     return date("l",strtotime($date));
@@ -163,13 +162,9 @@ function getMaxDate(){
     });
     </script>
 
-
-
-
 </head>
 
 <body>
-    <?php echo ""; ?>
     <ul class="nav justify-content-end">
         <!-- <li class="nav-item">
             <a id="chartButton" class="nav-link" href="HelpPage.php">How to Use</a>
