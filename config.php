@@ -6,12 +6,5 @@
 	$gClient->setClientSecret("GnApCiTjZSgBKaokyNYJaG3C");
 	$gClient->setApplicationName("breatheApp");
 	$gClient->setRedirectUri("http://localhost/breatheApp/DashboardPage.php");
-	$gClient->addScope("https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email");
+	$gClient->addScope("https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.readonly");
 ?>
-
-
-
-
-
-
-
