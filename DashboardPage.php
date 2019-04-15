@@ -30,13 +30,24 @@ else
   $results = $service->events->listEvents($calendarId, $eventDay);
   $durationBusyHours=0;
   $event_details=array();	
+  $work = 0;
+  $recretional = 0;
 
   if (count($results->getItems()) != 0) {
     foreach ($results->getItems() as $event) {
+      $category = $event->getDescription();
 	  $title = $event ->getsummary();
       $start = $event->start->dateTime;
 	  $end = $event->end->dateTime;
-	 
+        
+    if($category=="Work"){
+        $work+=1;
+    }
+
+    if($category=="Recreational"){
+        $recretional+=1;
+    }
+
       if (empty($start)) {
         $start = $event->start->date;
       }
@@ -102,6 +113,46 @@ if (!empty($events)) {
         array_push($stressLevelsFree, $durationFree);
     }
 }
+
+if($recretional<$work){
+    ?>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.8.2.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+        <script type='text/javascript'>
+                $(function(){
+                var overlay = $('<div id="overlay"></div>');
+                overlay.show();
+                overlay.appendTo(document.body);
+                $('.popup').show();
+                $('.close').click(function(){
+                $('.popup').hide();
+                overlay.appendTo(document.body).remove();
+                return false;
+                });
+
+                
+
+                $('.x').click(function(){
+                $('.popup').hide();
+                overlay.appendTo(document.body).remove();
+                return false;
+                });
+                });
+                </script>
+                <div class='popup'>
+                <div class='cnt223'>
+                <h1>“The unexamined life is not worth living” </h1>
+                <p>
+                – Socrates.
+                <br/>
+                <br/>
+                <a href='' class='close'>Close</a>
+                </p>
+                </div>
+                </div>
+    <?php
+}
+
 
 function getDayOfWeekFromDate($date){
     return date("l",strtotime($date));
