@@ -116,41 +116,41 @@ if (!empty($events)) {
 
 if($recretional<$work){
     ?>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-1.8.2.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
-        <script type='text/javascript'>
-                $(function(){
-                var overlay = $('<div id="overlay"></div>');
-                overlay.show();
-                overlay.appendTo(document.body);
-                $('.popup').show();
-                $('.close').click(function(){
-                $('.popup').hide();
-                overlay.appendTo(document.body).remove();
-                return false;
-                });
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.8.2.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+<script type='text/javascript'>
+$(function() {
+    var overlay = $('<div id="overlay"></div>');
+    overlay.show();
+    overlay.appendTo(document.body);
+    $('.popup').show();
+    $('.close').click(function() {
+        $('.popup').hide();
+        overlay.appendTo(document.body).remove();
+        return false;
+    });
 
-                
 
-                $('.x').click(function(){
-                $('.popup').hide();
-                overlay.appendTo(document.body).remove();
-                return false;
-                });
-                });
-                </script>
-                <div class='popup'>
-                <div class='cnt223'>
-                <h1>“The unexamined life is not worth living” </h1>
-                <p>
-                – Socrates.
-                <br/>
-                <br/>
-                <a href='' class='close'>Close</a>
-                </p>
-                </div>
-                </div>
-    <?php
+
+    $('.x').click(function() {
+        $('.popup').hide();
+        overlay.appendTo(document.body).remove();
+        return false;
+    });
+});
+</script>
+<div class='popup'>
+    <div class='cnt223'>
+        <h1>“The unexamined life is not worth living” </h1>
+        <p>
+            – Socrates.
+            <br />
+            <br />
+            <a href='' class='close'>Close</a>
+        </p>
+    </div>
+</div>
+<?php
 }
 
 
@@ -207,133 +207,159 @@ function getMaxDate(){
 
 <!Doctype html>
 <html>
+
 <head>
-	<title>Dashboard Page</title>
-	<meta charset="UTF-8">
+    <title>Dashboard Page</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<!-- Chart Scripts -->
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style type="text/css">
+    #chart-container {
+        width: 100%;
+        height: auto;
+    }
+    </style>
+
+    <!-- Chart Scripts -->
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js'>
-    </script>	
-	
-	<!-- Calendar Scripts -->
-	<link rel='stylesheet' href='../fullcalendar/fullcalendar.css'/>
-	<script src='../fullcalendar/lib/jquery.min.js'></script>
-	<script src='../fullcalendar/lib/moment.min.js'></script>
-	<script src='../fullcalendar/fullcalendar.js'></script>
-	<script src='../fullcalendar/gcal.js'></script>	
-	<script src='../node_modules/push.js/bin/push.min.js'></script>
-	
-	
-	<script>
-		$(function() {
-		  $('#calendar').fullCalendar({
-			plugins: [ 'googleCalendar' ],
-			header:{
-				  left:"prev,next today myCustomButton",
-				  center:"title",
-				  right:"month,listMonth,listWeek,listDay"
-			  },
-			  buttonText: {
-				month: 'Month',
-				listMonth: 'List Month',
-				listYear: 'List Year',
-				listWeek: 'List Week',
-				listDay: 'List Day'
-			},
-			  selectable:true,
-			  selectHelper:true,
-			  editable:true,
-			  droppable: true, 
+    </script>
 
-			eventSources: [
-			{
-				googleCalendarApiKey: "AIzaSyCH4g3WsOSKOy5gUFQu-A71MrHlvtgxxgQ",
-				googleCalendarId: "<?php echo $userData['email']?>"			
-			}],
-			
-			 eventClick: function(event){
-     
-			},
-			
-			 dayClick: function() {
-			 
-			 },
-		
-			
-		  })
-		});
-		
-		function reminder(){
-			Push.create("Take a break",{
-				body: "Your busy time is more 8 hours" ,
-				timeout:6000,
-			});
-		}
-		
-	// reminder to drink water every 1 hours
+    <!-- Calendar Scripts -->
+    <link rel='stylesheet' href='../fullcalendar/fullcalendar.css' />
+    <script src='../fullcalendar/lib/jquery.min.js'></script>
+    <script src='../fullcalendar/lib/moment.min.js'></script>
+    <script src='../fullcalendar/fullcalendar.js'></script>
+    <script src='../fullcalendar/gcal.js'></script>
+    <script src='../node_modules/push.js/bin/push.min.js'></script>
+
+
+    <script>
+    $(function() {
+        $('#calendar').fullCalendar({
+            plugins: ['googleCalendar'],
+            header: {
+                left: "prev,next today myCustomButton",
+                center: "title",
+                right: "month,listMonth,listWeek,listDay"
+            },
+            buttonText: {
+                month: 'Month',
+                listMonth: 'List Month',
+                listYear: 'List Year',
+                listWeek: 'List Week',
+                listDay: 'List Day'
+            },
+            selectable: true,
+            selectHelper: true,
+            editable: true,
+            droppable: true,
+
+            eventSources: [{
+                googleCalendarApiKey: "AIzaSyCH4g3WsOSKOy5gUFQu-A71MrHlvtgxxgQ",
+                googleCalendarId: "<?php echo $userData['email']?>"
+            }],
+
+            eventClick: function(event) {
+
+            },
+
+            dayClick: function() {
+
+            },
+
+
+        })
+    });
+
+    function reminder() {
+        Push.create("Take a break", {
+            body: "Your busy time is more 8 hours",
+            timeout: 6000,
+        });
+    }
+
+    // reminder to drink water every 1 hours
     var i = 0;
     var timer = setInterval(function() {
         Push.create("Hydrate reminder", {
-		body: "It's time to drink some water!",
-		icon: '/icon.png',
-		timeout: 4000,
-		   
-		onClick: function () {
-			window.focus();
-			this.close();
-		}
-	});
-    }, 3600000);
-	
-	
-	$(document).ready(function() {
-		setInterval(timestamp, 1000);
-		
-	});
+            body: "It's time to drink some water!",
+            icon: '/icon.png',
+            timeout: 4000,
 
-	function timestamp() {
-		$.ajax({
-			url: 'http://localhost/breatheApp/pages/timestamp.php',
-			success: function(data) {
-				$('#timestamp').html(data);	
-				
-				<?php foreach($event_details as $notification){?>
-				if(data == '<?=$notification['startTime']?>'){
-					Push.create('<?=$notification['title']?>',{
-						body: '<?=$notification['startTime']?>'+" ~ "+'<?=$notification['startTime']?>' ,
-						timeout:6000,
-					});
-				}
-				<?php } ?>
-				
-			},
-		});
-	}	
-	
-	</script>
-	
+            onClick: function() {
+                window.focus();
+                this.close();
+            }
+        });
+    }, 3600000);
+
+
+    $(document).ready(function() {
+        setInterval(timestamp, 1000);
+
+    });
+
+    function timestamp() {
+        $.ajax({
+            url: 'http://localhost/breatheApp/pages/timestamp.php',
+            success: function(data) {
+                $('#timestamp').html(data);
+
+                <?php foreach($event_details as $notification){?>
+                if (data == '<?=$notification['startTime']?>') {
+                    Push.create('<?=$notification['title']?>', {
+                        body: '<?=$notification['startTime']?>' + " ~ " +
+                            '<?=$notification['startTime']?>',
+                        timeout: 6000,
+                    });
+                }
+                <?php } ?>
+
+            },
+        });
+    }
+    </script>
+
 </head>
 
 <body>
-<!-- Navigation bar -->	
-<ul>
-	<li><a href="ReminderPage.php">Set Reminder</a></li>
-	<li><a href="ShareCalendar.php">Share Calendar</a></li>
-	<li><a href="LogoutPage.php">Sign Out</a></li>
-</ul>
+    <!-- Navigation bar -->
+    <ul class="nav justify-content-end">
+        <li class="nav-item p-2">
+            <a class="nav-link btn btn-primary" href="ReminderPage.php">Set Reminder</a>
+        </li>
+        <li class="nav-item p-2">
+            <a class="nav-link btn btn-primary" href="ShareCalendar.php">Share Calendar</a>
+        </li>
+        <li class="nav-item p-2">
+            <a class="nav-link btn btn-danger" href="LogoutPage.php">Sign Out</a>
+        </li>
+    </ul>
 
-<!-- Content -->	
-<div id="timestamp"></div>
-<div id="calendar"></div>
-<canvas id="graphCanvas"></canvas>
-	
-<?php if($durationBusyHours>8){
+    <!-- Content -->
+    <div id="timestamp"></div>
+
+    <div id="content"></div>
+    <div class="container">
+        <div id="calendar"></div>
+    </div>
+
+    <div class="container">
+        <canvas id="graphCanvas"></canvas>
+    </div>
+    </div>
+
+    <?php if($durationBusyHours>8){
 		echo "<script> reminder();</script>";
 	}?>
-	
-	<!-- rush level scripts -->
+
+    <!-- rush level scripts -->
     <script>
     $(document).ready(function() {
         showGraph();
@@ -396,5 +422,5 @@ function getMaxDate(){
     </script>
 
 </body>
-</html>
 
+</html>
