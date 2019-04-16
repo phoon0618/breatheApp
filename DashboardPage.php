@@ -205,7 +205,7 @@ function getMaxDate(){
 
 ?>
 
-<!Doctype html>
+<!DOCTYPE html>
 <html>
 
 <head>
