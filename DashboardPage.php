@@ -1,72 +1,71 @@
 <?php 
 
-require_once "config.php";
+    require_once "config.php";
 
-if(isset($_SESSION['access_token'])){
-	$authUrl = $gClient->createAuthUrl();
-	$gClient->setAccessToken($_SESSION['access_token']);}
-else if(isset($_GET['code'])){
-	$token = $gClient->fetchAccessTokenWithAuthCode($_GET['code']);
-	$_SESSION['access_token']=$token;
-}
-else 
-{
-	header('Location:LoginPage.php');
-}
+    if(isset($_SESSION['access_token'])){
+        $authUrl = $gClient->createAuthUrl();
+        $gClient->setAccessToken($_SESSION['access_token']);}
+    else if(isset($_GET['code'])){
+        $token = $gClient->fetchAccessTokenWithAuthCode($_GET['code']);
+        $_SESSION['access_token']=$token;
+    }
+    else 
+    {
+        header('Location:LoginPage.php');
+    }
 
-	$oAuth = new Google_Service_Oauth2($gClient);
-	$userData =	$oAuth->userinfo_v2_me->get();
-	$service = new Google_Service_Calendar($gClient);
-	
-   // get event from the google calendar
-  $calendarId = 'primary';
-  $eventDay = array(
-    'orderBy' => 'startTime',
-    'singleEvents' => TRUE,
-	'timeMax' => date('c', mktime(0,0,0, date('m'), date('d')+1, date('y'))),
-    'timeMin' => date('c'),
-  );
-  
-  $results = $service->events->listEvents($calendarId, $eventDay);
-  $durationBusyHours=0;
-  $event_details=array();	
-  $work = 0;
-  $recretional = 0;
+    $oAuth = new Google_Service_Oauth2($gClient);
+    $userData =	$oAuth->userinfo_v2_me->get();
+    $service = new Google_Service_Calendar($gClient);
 
-  if (count($results->getItems()) != 0) {
+    // get event from the google calendar
+    $calendarId = 'primary';
+    $eventDay = array(
+        'orderBy' => 'startTime',
+        'singleEvents' => TRUE,
+        'timeMax' => date('c', mktime(0,0,0, date('m'), date('d')+1, date('y'))),
+        'timeMin' => date('c'),
+    );
+
+    $results = $service->events->listEvents($calendarId, $eventDay);
+    $durationBusyHours=0;
+    $event_details=array();	
+    $work = 0;
+    $recretional = 0;
+
+    if (count($results->getItems()) != 0) {
     foreach ($results->getItems() as $event) {
-      $category = $event->getDescription();
-	  $title = $event ->getsummary();
-      $start = $event->start->dateTime;
-	  $end = $event->end->dateTime;
+        $category = $event->getDescription();
+        $title = $event ->getsummary();
+        $start = $event->start->dateTime;
+        $end = $event->end->dateTime;
+            
+        if($category=="Work"){
+            $work+=1;
+        }
+
+        if($category=="Recreational"){
+            $recretional+=1;
+        }
+
+        if (empty($start)) {
+            $start = $event->start->date;
+        }
+        if(empty($end)){
+            $end = $event->end->date;  
+        }
+
+        $startEvent = strtotime($start);
+        $endEvent = strtotime($end);
+        $durationBusyHours += ($endEvent - $startEvent)/3600; //in hours
         
-    if($category=="Work"){
-        $work+=1;
+        $start = new DateTime($start);
+        $end = new DateTime($end);
+        array_push($event_details,array("title"=>$title,"startTime"=>$start->format('H:i:s'),"endTime"=>$end->format('H:i:s'))); 
     }
+}
 
-    if($category=="Recreational"){
-        $recretional+=1;
-    }
 
-      if (empty($start)) {
-        $start = $event->start->date;
-      }
-	  if(empty($end))
-	  {
-		 $end = $event->end->date;  
-	  }
-
-      $startEvent = strtotime($start);
-      $endEvent = strtotime($end);
-	  $durationBusyHours += ($endEvent - $startEvent)/3600; //in hours
-	  
-	  $start = new DateTime($start);
-	  $end = new DateTime($end);
-	  array_push($event_details,array("title"=>$title,"startTime"=>$start->format('H:i:s'),"endTime"=>$end->format('H:i:s'))); 
-    } 
-  }
-   
-   
    	//get this week events
 $eventWeek = array(
     'orderBy' => 'startTime',
@@ -115,7 +114,8 @@ if (!empty($events)) {
 }
 
 if($recretional<$work){
-    ?>
+?>
+
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.8.2.js"></script>
 <link rel="stylesheet" type="text/css" href="style.css">
 <script type='text/javascript'>
@@ -152,7 +152,6 @@ $(function() {
 </div>
 <?php
 }
-
 
 function getDayOfWeekFromDate($date){
     return date("l",strtotime($date));
@@ -331,6 +330,9 @@ function getMaxDate(){
 <body>
     <!-- Navigation bar -->
     <ul class="nav justify-content-end">
+        <li class="nav-item p-2">
+            <a class="nav-link btn btn-primary" href="AddEventPage.php">Add Event</a>
+        </li>
         <li class="nav-item p-2">
             <a class="nav-link btn btn-primary" href="ReminderPage.php">Set Reminder</a>
         </li>

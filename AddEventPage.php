@@ -33,7 +33,7 @@ if(isset($_POST['submit'])){
 <html>
 
 <head>
-    <title>Set Notification</title>
+    <title>Add an Event</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -51,17 +51,17 @@ if(isset($_POST['submit'])){
         </li>
     </ul>
 
-    <div id="reminderForm">
+    <div id="addEventForm">
         <form action="#" method="POST">
-            <h1>Set Reminder</h1>
+            <h1>Add Event</h1>
 
-            <label><b>Reminder Title</b></label>
-            <input type="text" placeholder="Enter Reminder Title" name="title" required> <br>
+            <label><b>Title</b></label>
+            <input type="text" placeholder="Enter Event Title" name="title" required> <br>
 
-            <label><b>Reminder Date</b></label>
+            <label><b>Date</b></label>
             <input type="date" name="date"><br>
 
-            <label><b>Reminder Time</b></label>
+            <label><b>Time</b></label>
             <input type="time" name="time"><br>
 
             <input type="submit" name="submit">
