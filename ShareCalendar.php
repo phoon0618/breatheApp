@@ -21,9 +21,11 @@ if(isset($_POST['submit'])){
 	$scope->setType("user");
 	$scope->setValue($_POST["email"]);
 	$rule->setScope($scope);
-	$rule->setRole("reader");
+	$rule->setRole("freeBusyReader");
 	$sendNotifications = array('sendNotifications' => true);
-	$createdRule = $service->acl->insert('primary', $rule, $sendNotifications);
+	$createdRule = $service->acl->insert('primary', $rule, $sendNotifications);?>
+	
+	<script>alert("Successfully shared your calendar")</script> <?php
 }
 
 ?>
@@ -31,22 +33,30 @@ if(isset($_POST['submit'])){
 <!Doctype html>
 <html>
 <head>
-	<title>Share Calendar</title>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Share Calendar Page</title>
+	
+	<!-- Navigation Css -->
+	<link rel="stylesheet" type="text/css" href='../css/nav.css'>
+	<link rel="stylesheet" type="text/css" href='../css/form.css'>
 </head>
 
 <body>
-<ul>
-	<li><a href="DashboardPage.php">Dashboard Page</a></li>
+<ul class="nav">
+	<li class="title">Share Calendar Page</li>
 	<li><a href="LogoutPage.php">Sign out</a></li>
+	<li><a href="DashboardPage.php">Dashboard Page</a></li>
 </ul>
 	
 <div id="shareCalendarForm">
   <form action="#" method="POST">
-    <h1>Set User</h1>
+    <h1 class="title">Share Calendar</h1>
 	
-    <label><b>Share user email address</b></label>
-    <input type="email" name ="email" placeholder="Enter email address of a user" id="email address" required>
-    <input type="submit" name="submit">
+    <label><b>Email address</b></label>
+    <input type="email" name ="email" placeholder="Enter email address" required>
+	<br>
+   <input type="submit" name="submit" class="submit_btn">
   </form>
 </div>
 	

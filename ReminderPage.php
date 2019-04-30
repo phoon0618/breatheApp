@@ -26,25 +26,35 @@ if(isset($_POST['submit'])){
 	$endEvent = strtotime($_POST["date"]." ".$_POST["time"])+1800;
 	$end->setDateTime(date('c',$endEvent));
 	$event->setEnd($end);
-	$createdEvent = $service->events->insert('primary', $event);
+	$createdEvent = $service->events->insert('primary', $event);?>
+	
+	<script>alert("Successfully set your reminder")</script> <?php
 }
 ?>
 
 <!Doctype html>
 <html>
 <head>
-	<title>Set Notification Page</title>
+	<title>Customise Notification Page</title>
+	
+	<!-- Navigation Css -->
+	<link rel="stylesheet" type="text/css" href='../css/nav.css'>
+	<link rel="stylesheet" type="text/css" href='../css/form.css'>
 </head>
 
 <body>
-<ul>
-	<li><a href="DashboardPage.php">Dashboard Page</a></li>
+<ul class="nav">
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<li class="title" >Customise Notification Page</li>
 	<li><a href="LogoutPage.php">Sign out</a></li>
+	<li><a href="DashboardPage.php">Dashboard Page</a></li>
+	
 </ul>
 
 <div id="reminderForm">
   <form action="#" method="POST">
-    <h1>Set Reminder</h1>
+    <h1 class="title">Set Reminder</h1>
 	
     <label><b>Reminder Title</b></label>
     <input type="text" placeholder="Enter Reminder Title" name="title" required> <br>
@@ -55,7 +65,8 @@ if(isset($_POST['submit'])){
 	<label><b>Reminder Time</b></label>
     <input type="time" name="time"><br>
 
-    <input type="submit" name="submit">
+    <input type="submit" name="submit" class="submit_btn">
+	
   </form>
 </div>
 	

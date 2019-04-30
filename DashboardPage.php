@@ -18,106 +18,163 @@ else
 	$userData =	$oAuth->userinfo_v2_me->get();
 	$service = new Google_Service_Calendar($gClient);
 	
-   // get event from the google calendar
+   // get daily event from the google calendar
   $calendarId = 'primary';
   $eventDay = array(
     'orderBy' => 'startTime',
     'singleEvents' => TRUE,
 	'timeMax' => date('c', mktime(0,0,0, date('m'), date('d')+1, date('y'))),
-    'timeMin' => date('c'),
+    'timeMin' => date('c', mktime(0,0,0, date('m'), date('d'), date('y'))),
+	'timeZone' => 'Asia/Kuala_Lumpur',
   );
   
   $results = $service->events->listEvents($calendarId, $eventDay);
-  $durationBusyHours=0;
-  $event_details=array();	
-  $work = 0;
-  $recretional = 0;
+  //declare viarables
+  $sleepHours = 8; //asume user sleep 8 hours
+  $durationBusyHours = 0;
+  $durationFreeHours = 0;
+  $durationWork = 0;
+  $durationRecretional = 0;
+  $durationExercise = 0;
+  $event_details = array();	
 
   if (count($results->getItems()) != 0) {
     foreach ($results->getItems() as $event) {
-      $category = $event->getDescription();
 	  $title = $event ->getsummary();
+	  $category = $event->getDescription();
       $start = $event->start->dateTime;
 	  $end = $event->end->dateTime;
-        
-    if($category=="Work"){
-        $work+=1;
+    
+	if (empty($start)) {
+		$start = $event->start->date;
     }
-
-    if($category=="Recreational"){
-        $recretional+=1;
+	
+	if(empty($end))
+	{
+		$end = $event->end->date;  
+	}  
+	
+	//calculate busy hours per day
+	$startEvent = strtotime($start);
+    $endEvent = strtotime($end);
+	$durationBusyHours += ($endEvent - $startEvent)/3600; //in hours
+	
+	if($category=="Work"){
+        $durationWork += ($endEvent - $startEvent)/3600; 
     }
-
-      if (empty($start)) {
-        $start = $event->start->date;
-      }
-	  if(empty($end))
-	  {
-		 $end = $event->end->date;  
-	  }
-
-      $startEvent = strtotime($start);
-      $endEvent = strtotime($end);
-	  $durationBusyHours += ($endEvent - $startEvent)/3600; //in hours
+	
+	if($category=="Exercise"){
+       $durationExercise += ($endEvent - $startEvent)/3600; 
+    }
+	
+	if($category=="Recreational"){
+       $durationRecretional += ($endEvent - $startEvent)/3600; 
+    }	
 	  
-	  $start = new DateTime($start);
-	  $end = new DateTime($end);
-	  array_push($event_details,array("title"=>$title,"startTime"=>$start->format('H:i:s'),"endTime"=>$end->format('H:i:s'))); 
-    } 
-  }
-   
-   
-   	//get this week events
-$eventWeek = array(
-    'orderBy' => 'startTime',
-    'singleEvents' => true,
-    'timeMin' => getMinDate(),
-    'timeMax' => getMaxDate()
-);
-
-//variable declarations
-$sleepHours = 8;
-$stressLevelsBusy= array();
-$stressLevelsFree= array();
-
-$results = $service->events->listEvents($calendarId, $eventWeek);
-$events = $results->getItems();
-
-//generate datasets for charts
-if (!empty($events)) {
-    $dayCount = 0; //represent sunday
-    $cur = getMinDate();//initialise cursor to check if previous event is on same day
-    for($dayCount = 0; $dayCount < 7; $dayCount++){
-        $durationBusy = 0;
-        foreach ($events as $event) {
-            $start = $event->start->dateTime;
-            $end = $event->end->dateTime;
-            $sameDay = getDayOfWeekNumber($start) == $dayCount? True: False;
-
-            if (empty($start))
-                $start = $event->start->date;
-            if (empty($end))
-                $end = $event->end->date;
-            
-            $start = strtotime($start);
-            $end = strtotime($end);
-            
-            if($sameDay){
-                $durationBusy += ($end - $start) / 3600; //in hours
-            }
-        };
-        
-        $durationFree = 24 - $durationBusy - $sleepHours;
-        
-        array_push($stressLevelsBusy, $durationBusy);
-        array_push($stressLevelsFree, $durationFree);
+	//for notification purpose
+	$start = new DateTime($start);
+	$end = new DateTime($end);
+	array_push($event_details,array("title"=>$title,"startTime"=>$start->format('H:i:s'),"endTime"=>$end->format('H:i:s'))); 
     }
-}
+	$durationBusyHours = $durationExercise + $durationWork + $durationRecretional;
+	$durationFreeHours = 24-8-$durationBusyHours; //in hours
+  }
 
-if($recretional<$work){
+	//get this weekly events
+	$eventWeek = array(
+		'orderBy' => 'startTime',
+		'singleEvents' => true,
+		'timeMin' => getMinDate(),
+		'timeMax' => getMaxDate()
+	);
+
+	//variable declarations
+	$stressLevelsBusy= array();
+	$stressLevelsFree= array();
+	$results = $service->events->listEvents($calendarId, $eventWeek);
+	$events = $results->getItems();	
+	
+	//generate datasets for charts
+	if (!empty($events)) {
+		$dayCount = 0; //represent sunday
+		$cur = getMinDate();//initialise cursor to check if previous event is on same day
+		for($dayCount = 0; $dayCount < 7; $dayCount++){
+			$durationBusy = 0;
+			foreach ($events as $event) {
+				$start = $event->start->dateTime;
+				$end = $event->end->dateTime;
+				$sameDay = getDayOfWeekNumber($start) == $dayCount? True: False;
+				if (empty($start))
+					$start = $event->start->date;
+				if (empty($end))
+					$end = $event->end->date;
+				
+				$start = strtotime($start);
+				$end = strtotime($end);
+				
+				if($sameDay){
+					$durationBusy += ($end - $start) / 3600; //in hours
+				}
+			};
+			
+			$durationFree = 24 - $durationBusy - $sleepHours;
+			
+			array_push($stressLevelsBusy, $durationBusy);
+			array_push($stressLevelsFree, $durationFree);
+		}
+	}
+
+	function getDayOfWeekFromDate($date){
+		return date("l",strtotime($date));
+	}
+	//so that will save 0 for days without events
+	function getDayOfWeekNumber($date){
+		$date = getDayOfWeekFromDate($date);
+		//switch statement for sun = 0, mon = 1, etc
+		switch ($date) {
+			case 'Sunday':
+				return "0";
+			
+			case 'Monday':
+				return "1";
+			
+			case 'Tuesday':
+				return "2";
+			
+			case 'Wednesday':
+				return "3";
+		
+			case 'Thursday':
+				return "4";
+			
+			case 'Friday':
+				return "5";
+			
+			case 'Saturday':
+				return "6";  
+		}
+	}
+
+	//get first day of the week
+	function getMinDate(){
+		$minDate = (date("l",strtotime("now")) === "Sunday") ? 
+			strtotime("now") : //if today is sunday, today is first day of week
+			strtotime("previous sunday");
+		return date('c', $minDate);
+	}
+
+	//get last day of the week
+	function getMaxDate(){
+		$maxDate = (date("l",strtotime("now")) === "Saturday") ?
+			strtotime("now"): //if today is saturday, today is last day of week
+			strtotime("next saturday");
+		return date('c', $maxDate);
+	}
+
+  if($durationRecretional+$durationExercise<$durationWork){
     ?>
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.8.2.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
         <script type='text/javascript'>
                 $(function(){
                 var overlay = $('<div id="overlay"></div>');
@@ -129,8 +186,6 @@ if($recretional<$work){
                 overlay.appendTo(document.body).remove();
                 return false;
                 });
-
-                
 
                 $('.x').click(function(){
                 $('.popup').hide();
@@ -152,56 +207,11 @@ if($recretional<$work){
                 </div>
     <?php
 }
-
-
-function getDayOfWeekFromDate($date){
-    return date("l",strtotime($date));
-}
-
-//so that will save 0 for days without events
-function getDayOfWeekNumber($date){
-    $date = getDayOfWeekFromDate($date);
-    //switch statement for sun = 0, mon = 1, etc
-    switch ($date) {
-        case 'Sunday':
-            return "0";
-        
-        case 'Monday':
-            return "1";
-        
-        case 'Tuesday':
-            return "2";
-        
-        case 'Wednesday':
-            return "3";
-    
-        case 'Thursday':
-            return "4";
-        
-        case 'Friday':
-            return "5";
-        
-        case 'Saturday':
-            return "6";  
-    }
-}
-
-//get first day of the week
-function getMinDate(){
-    $minDate = (date("l",strtotime("now")) === "Sunday") ? 
-        strtotime("now") : //if today is sunday, today is first day of week
-        strtotime("previous sunday");
-    return date('c', $minDate);
-}
-
-//get last day of the week
-function getMaxDate(){
-    $maxDate = (date("l",strtotime("now")) === "Saturday") ?
-        strtotime("now"): //if today is saturday, today is last day of week
-        strtotime("next saturday");
-    return date('c', $maxDate);
-}
- 
+   
+	if(isset($_POST['sleepHours']))
+	{
+		$sleepHours = $_POST["sleepingHours"];
+	}
 
 ?>
 
@@ -216,6 +226,10 @@ function getMaxDate(){
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js'>
     </script>	
+	
+	<!-- Navigation Css -->
+	<link rel="stylesheet" type="text/css" href='../css/nav.css'>
+	<link rel="stylesheet" type="text/css" href='../css/calendar.css'>
 	
 	<!-- Calendar Scripts -->
 	<link rel='stylesheet' href='../fullcalendar/fullcalendar.css'/>
@@ -252,15 +266,6 @@ function getMaxDate(){
 				googleCalendarApiKey: "AIzaSyCH4g3WsOSKOy5gUFQu-A71MrHlvtgxxgQ",
 				googleCalendarId: "<?php echo $userData['email']?>"			
 			}],
-			
-			 eventClick: function(event){
-     
-			},
-			
-			 dayClick: function() {
-			 
-			 },
-		
 			
 		  })
 		});
@@ -312,50 +317,111 @@ function getMaxDate(){
 		});
 	}	
 	
+	function chart(){
+		 var chart_btn = document.getElementById("chart_btn").value;
+		 var pieChart = document.getElementById("piechart");
+		 var radarChart = document.getElementById("radarchart");
+		
+			if (chart_btn == "Weekly Stress Level" )
+			{
+				radarChart.style.display = "block";
+				pieChart.style.display = "none";
+				document.getElementById("chart_btn").value ="Daily Activities";
+			}
+			else {
+				radarChart.style.display = "none";
+				pieChart.style.display = "block";
+				document.getElementById("chart_btn").value ="Weekly Stress Level" ;
+			}
+		}
 	</script>
-	
 </head>
 
 <body>
 <!-- Navigation bar -->	
-<ul>
-	<li><a href="ReminderPage.php">Set Reminder</a></li>
-	<li><a href="ShareCalendar.php">Share Calendar</a></li>
+<ul class="nav">
+	<li class="title">Dashboard Page</li>
 	<li><a href="LogoutPage.php">Sign Out</a></li>
+	<li><a href="ShareCalendar.php">Share Calendar</a></li>
+	<li><a href="ReminderPage.php">Customise Reminder</a></li>
+	<li><a href="AddEventPage.php">Add Event</a></li>	
 </ul>
 
 <!-- Content -->	
 <div id="timestamp"></div>
-<div id="calendar"></div>
-<canvas id="graphCanvas"></canvas>
+<div id="content">
+	<div id="calendar"></div>
 	
-<?php if($durationBusyHours>8){
-		echo "<script> reminder();</script>";
-	}?>
+	<div>
+		<input id="chart_btn" type="button" onclick="chart()" value="Weekly Stress Level">
+		<br>
+		<form method="POST" action="#">
+			<select name="sleepingHours">
+				<optgroup label = "Sleeping Hours">
+				<option value="10">10</option>
+				<option value="9">9</option>
+				<option value="8">8</option>
+				<option value="7">7</option>
+				<option value="6">6</option>
+				<option value="5">5</option>
+				<option value="4">4</option>
+				<option value="3">3</option>
+				<option value="2">2</option>
+				<option value="1">1</option>
+				<option value="0">0</option>
+			</select>
+			
+			<input type="submit" name="sleepHours">
+		</form>			
+		
+		<div id="piechart" style="width:100%;height:500px;display:block;"></div>
+		<div id="radarchart" style="display:none;"><canvas id="graphCanvas"></canvas><div>
+	</div>
 	
-	<!-- rush level scripts -->
-    <script>
-    $(document).ready(function() {
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<script>
+
+	google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+          ['Category', 'Hours per Day'],
+          ['Work',    <?=$durationWork?> ],
+          ['Exercise',  <?=$durationExercise?>],
+          ['Recreational',  <?=$durationRecretional?>],
+          ['Sleep',    <?=$sleepHours?>],
+		  ['Free Time',  <?=$durationFreeHours?>]
+        ]);
+
+        var options = {
+          title: 'My Daily Activities'
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+
+        chart.draw(data, options);
+      }
+	  
+	  
+	 $(document).ready(function() {
         showGraph();
     });
-
     function showGraph() {
         {
             $.post("DashboardPage.php",
                 function(data) {
-
                     var xAxis = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
                     var dsBusy = [];
                     var dsFree = [];
-
                     <?php foreach($stressLevelsBusy as $sl){ ?>
                     dsBusy.push(<?php echo $sl?>);
                     <?php } ?>
-
                     <?php foreach($stressLevelsFree as $sl){ ?>
                     dsFree.push(<?php echo $sl?>);
                     <?php  } ?>
-
                     var chartdata = {
                         labels: xAxis,
                         datasets: [{
@@ -370,7 +436,6 @@ function getMaxDate(){
                             data: dsFree
                         }]
                     };
-
                     var options = {
                         title: {
                             display: true,
@@ -382,9 +447,7 @@ function getMaxDate(){
                             }
                         }
                     };
-
                     var graphTarget = $("#graphCanvas");
-
                     var barGraph = new Chart(graphTarget, {
                         type: 'radar',
                         data: chartdata,
@@ -393,7 +456,12 @@ function getMaxDate(){
                 });
         }
     }
-    </script>
+</script>
+	
+<?php if($durationBusyHours>8){
+		echo "<script> reminder();</script>";
+	}?>
+</div>
 
 </body>
 </html>

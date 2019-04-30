@@ -1,0 +1,34 @@
+* {
+	margin: 0px; 
+	padding: 0px; 
+	box-sizing: border-box;
+}
+
+ul.nav {
+    margin:0;
+    padding:0;
+    list-style:none;
+    height:40px; line-height:40px;
+    background:#333333; 
+}
+ul.nav li.title {
+    float:left;
+	border:none;
+	color:#ffffff;
+	padding:0 28px;
+}
+
+ul.nav li {
+    border-right:1px solid #ffffff;
+    float:right;
+}
+ul.nav a {
+    display:block;
+    padding:0 28px;
+    color:#ffffff;
+    text-decoration:none;
+}
+ul.nav a:hover,
+ul.nav li.current a {
+    background:#808080;
+}

@@ -1,0 +1,28 @@
+#reminderForm, #shareCalendarForm, #addEventForm
+{
+	position:fixed;
+   top:15%;
+   left:35%;
+   width:30%;
+   padding:3%;
+   border: 1px solid black;
+   border-radius: 25px;
+}
+
+input, .category {
+	width:100%;
+	padding:1%;
+	margin:1%;
+}
+
+
+.title{
+	text-align:center;
+	padding-bottom:2%;
+}
+
+.submit_btn{
+	margin-top:2%;
+}
+
+
