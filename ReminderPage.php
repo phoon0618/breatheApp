@@ -8,8 +8,7 @@ else if(isset($_GET['code'])){
 	$token = $gClient->fetchAccessTokenWithAuthCode($_GET['code']);
 	$_SESSION['access_token']=$token;
 }
-else 
-{
+else{
 	header('Location:LoginPage.php');
 }
 
@@ -32,8 +31,9 @@ if(isset($_POST['submit'])){
 }
 ?>
 
-<!Doctype html>
+<!DOCTYPE html>
 <html>
+
 <head>
 	<title>Customise Notification Page</title>
 	
@@ -59,11 +59,9 @@ if(isset($_POST['submit'])){
     <label><b>Reminder Title</b></label>
     <input type="text" placeholder="Enter Reminder Title" name="title" required> <br>
 
-    <label><b>Reminder Date</b></label>
-    <input type="date" name="date"><br>
-	
-	<label><b>Reminder Time</b></label>
-    <input type="time" name="time"><br>
+            <input type="submit" name="submit">
+        </form>
+    </div>
 
     <input type="submit" name="submit" class="submit_btn">
 	
@@ -71,5 +69,5 @@ if(isset($_POST['submit'])){
 </div>
 	
 </body>
-</html>
 
+</html>

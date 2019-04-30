@@ -8,8 +8,7 @@ else if(isset($_GET['code'])){
 	$token = $gClient->fetchAccessTokenWithAuthCode($_GET['code']);
 	$_SESSION['access_token']=$token;
 }
-else 
-{
+else{
 	header('Location:LoginPage.php');
 }
 
@@ -30,8 +29,9 @@ if(isset($_POST['submit'])){
 
 ?>
 
-<!Doctype html>
+<!DOCTYPE html>
 <html>
+
 <head>
 	<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -63,6 +63,16 @@ if(isset($_POST['submit'])){
 </body>
 </html>
 
+    <div id="shareCalendarForm">
+        <form action="#" method="POST">
+            <h1>Set User</h1>
 
+            <label><b>Share user email address</b></label>
+            <input type="email" name="email" placeholder="Enter email address of a user" id="email address" required>
+            <input type="submit" name="submit">
+        </form>
+    </div>
 
+</body>
 
+</html>

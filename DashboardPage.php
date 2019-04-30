@@ -1,18 +1,18 @@
 <?php 
 
-require_once "config.php";
+    require_once "config.php";
 
-if(isset($_SESSION['access_token'])){
-	$authUrl = $gClient->createAuthUrl();
-	$gClient->setAccessToken($_SESSION['access_token']);}
-else if(isset($_GET['code'])){
-	$token = $gClient->fetchAccessTokenWithAuthCode($_GET['code']);
-	$_SESSION['access_token']=$token;
-}
-else 
-{
-	header('Location:LoginPage.php');
-}
+    if(isset($_SESSION['access_token'])){
+        $authUrl = $gClient->createAuthUrl();
+        $gClient->setAccessToken($_SESSION['access_token']);}
+    else if(isset($_GET['code'])){
+        $token = $gClient->fetchAccessTokenWithAuthCode($_GET['code']);
+        $_SESSION['access_token']=$token;
+    }
+    else 
+    {
+        header('Location:LoginPage.php');
+    }
 
 	$oAuth = new Google_Service_Oauth2($gClient);
 	$userData =	$oAuth->userinfo_v2_me->get();
@@ -215,14 +215,27 @@ else
 
 ?>
 
-<!Doctype html>
+<!DOCTYPE html>
 <html>
+
 <head>
-	<title>Dashboard Page</title>
-	<meta charset="UTF-8">
+    <title>Dashboard Page</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<!-- Chart Scripts -->
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style type="text/css">
+    #chart-container {
+        width: 100%;
+        height: auto;
+    }
+    </style>
+
+    <!-- Chart Scripts -->
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js'>
     </script>	
@@ -281,15 +294,15 @@ else
     var i = 0;
     var timer = setInterval(function() {
         Push.create("Hydrate reminder", {
-		body: "It's time to drink some water!",
-		icon: '/icon.png',
-		timeout: 4000,
-		   
-		onClick: function () {
-			window.focus();
-			this.close();
-		}
-	});
+            body: "It's time to drink some water!",
+            icon: '/icon.png',
+            timeout: 4000,
+
+            onClick: function() {
+                window.focus();
+                this.close();
+            }
+        });
     }, 3600000);
 	
 	
@@ -464,5 +477,5 @@ else
 </div>
 
 </body>
-</html>
 
+</html>
